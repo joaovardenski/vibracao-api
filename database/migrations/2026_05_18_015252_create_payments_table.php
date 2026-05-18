@@ -12,9 +12,9 @@ return new class extends Migration
             $table->uuid('id')->primary();
 
             $table->foreignUuid('order_id')->constrained('orders')->cascadeOnDelete();
-            $table->string('gateway_payment_id')->unique();
+            $table->string('gateway_payment_id')->nullable()->unique();
             $table->string('payment_method');
-            $table->string('status')->index();
+            $table->enum('status', ['pending','approved','rejected','expired'])->default('pending');
             $table->decimal('amount', 10, 2);
             $table->timestamp('paid_at')->nullable();
             $table->json('raw_response')->nullable();

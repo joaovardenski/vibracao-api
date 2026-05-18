@@ -13,9 +13,9 @@ return new class extends Migration
             $table->uuid('id')->primary();
 
             $table->string('full_name');
-            $table->string('cpf')->index();
+            $table->string('cpf')->unique();
             $table->string('email')->index();
-            $table->string('phone');
+            $table->string('phone')->index();
             $table->string('city');
             $table->string('parish');
             $table->string('emergency_contact')->nullable();
