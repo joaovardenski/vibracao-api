@@ -13,7 +13,7 @@ return new class extends Migration
 
             $table->foreignUuid('participant_id')->constrained('participants')->cascadeOnDelete();
             $table->foreignUuid('ticket_lot_id')->constrained('ticket_lots');
-            $table->string('ticket_number', 20)->unique();
+            $table->string('ticket_number', 20)->nullable()->unique();
             $table->enum('status', ['pending','approved','expired'])->default('pending');
             $table->decimal('amount', 10, 2);
             $table->timestamp('expires_at')->nullable();

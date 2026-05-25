@@ -15,7 +15,6 @@ return new class extends Migration
             $table->decimal('price', 10, 2);
             $table->timestamp('starts_at');
             $table->timestamp('ends_at');
-            $table->boolean('is_active')->default(true);
 
             $table->timestamps();
         });

@@ -29,8 +29,6 @@ class TicketLotFactory extends Factory
 
             'starts_at' => $startDate,
             'ends_at' => $endDate,
-
-            'is_active' => fake()->boolean(90),
         ];
     }
 }

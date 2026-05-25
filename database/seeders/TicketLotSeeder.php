@@ -14,7 +14,6 @@ class TicketLotSeeder extends Seeder
             'price' => 30.00,
             'starts_at' => now()->subDays(10),
             'ends_at' => now()->addDays(10),
-            'is_active' => true,
         ]);
 
         TicketLot::create([
@@ -22,7 +21,6 @@ class TicketLotSeeder extends Seeder
             'price' => 35.00,
             'starts_at' => now()->addDays(11),
             'ends_at' => now()->addDays(30),
-            'is_active' => false,
         ]);
     }
 }

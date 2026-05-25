@@ -16,7 +16,8 @@ class OrderFactory extends Factory
 
     public function definition(): array
     {
-        $status = fake()->randomElement([
+        $status = 
+        fake()->randomElement([
             'pending',
             'approved',
             'expired',

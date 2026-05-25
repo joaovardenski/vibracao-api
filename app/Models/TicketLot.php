@@ -18,18 +18,24 @@ class TicketLot extends Model
         'price',
         'starts_at',
         'ends_at',
-        'is_active',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
-        'is_active' => 'boolean',
     ];
 
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
+    }
+
+    public static function current()
+    {
+        return self::query()
+            ->where('starts_at', '<=', now())
+            ->where('ends_at', '>=', now())
+            ->firstOrFail();
     }
 }
