@@ -1,6 +1,5 @@
 <?php
 
-use DomainException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -29,6 +28,10 @@ return Application::configure(
                     ? null
                     : route('login')
         );
+
+        $middleware->alias([
+            'mp.signature' => \App\Http\Middleware\ValidateMercadoPagoSignature::class,
+        ]);
     })
 
     ->withExceptions(function (

@@ -19,10 +19,9 @@ class TicketLotFactory extends Factory
 
         return [
             'name' => fake()->randomElement([
-                '1º Lote',
-                '2º Lote',
-                'Lote Promocional',
-                'Lote Final',
+                'Ingresso Vibração Jovem 2026 - 1º Lote',
+                'Ingresso Vibração Jovem 2026 - 2º Lote',
+                'Ingresso Vibração Jovem 2026 - Lote Final',
             ]),
 
             'price' => fake()->randomFloat(2, 25, 60),

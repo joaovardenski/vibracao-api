@@ -8,12 +8,14 @@ use App\Models\Participant;
 use App\Models\TicketLot;
 use Illuminate\Support\Facades\DB;
 use DomainException;
+use Exception;
 
 class CreateRegistrationService
 {
-    public function execute(array $data): array
-    {
-        return DB::transaction(function () use ($data) {
+    public function __construct(private MercadoPagoService $mercadoPago) {}
+
+    public function execute(array $data): array {
+        [$participant, $order, $payment] = DB::transaction(function () use ($data) {
             $ticketLot = $this->getCurrentTicketLot();
             $this->ensureTicketsAvailable();
 
@@ -30,8 +32,15 @@ class CreateRegistrationService
             $order       = $this->createOrder($participant, $ticketLot);
             $payment     = $this->createPayment($order);
 
-            return compact('participant', 'order', 'payment');
+            return [$participant, $order, $payment];
         });
+
+        $preference = $this->createPreferenceOrCancel(
+            $order,
+            $payment
+        );
+
+        return compact('participant', 'order', 'payment', 'preference');
     }
 
     private function ensureTicketsAvailable(): void {
@@ -98,5 +107,35 @@ class CreateRegistrationService
             'status' => 'pending',
             'amount' => $order->amount,
         ]);
+    }
+
+    private function createPreferenceOrCancel(Order $order, Payment $payment) {
+        try {
+            $preference =
+                $this->mercadoPago
+                    ->createPreference(
+                        title: $order->ticketLot->name,
+                        price: (float) $payment->amount,
+                        externalReference: (string) $order->id,
+                        participant: $order->participant,
+                    );
+
+            $payment->update([
+                'gateway_payment_id' => $preference->id
+            ]);
+
+            return $preference;
+
+        } catch (Exception $e) {
+            $order->update([
+                'status' => 'cancelled'
+            ]);
+
+            $payment->update([
+                'status' => 'cancelled'
+            ]);
+
+            throw $e;
+        }
     }
 }
