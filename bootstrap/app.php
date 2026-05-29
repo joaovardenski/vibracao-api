@@ -19,9 +19,6 @@ return Application::configure(
     ->withMiddleware(function (
         Middleware $middleware
     ): void {
-
-        $middleware->statefulApi();
-
         $middleware->redirectGuestsTo(
             fn ($request) =>
                 $request->is('api/*')

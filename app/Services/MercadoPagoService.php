@@ -63,9 +63,9 @@ class MercadoPagoService
                     ->toIso8601String(),
 
                 'back_urls' => [
-                    'success' => config('app.front_url') . '/payment/success',
-                    'failure' => config('app.front_url') . '/payment/failure',
-                    'pending' => config('app.front_url') . '/payment/pending',
+                    'success' => config('app.front_url') . '/payment',
+                    'failure' => config('app.front_url') . '/payment',
+                    'pending' => config('app.front_url') . '/payment',
                 ],
                 'auto_return' => 'approved',
             ]);

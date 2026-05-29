@@ -22,3 +22,6 @@ Route::post('/registrations', [RegistrationController::class, 'store'])->name('a
 Route::post('/webhooks/mercado-pago', [MercadoPagoWebhookController::class, 'handle'])->name('api.webhooks.mercado-pago')
     ->middleware('throttle:100,1')
     ->middleware('mp.signature');
+
+// Order Status Update route
+Route::get('/orders/{order}/status', [RegistrationController::class, 'status'])->name('api.orders.status');
