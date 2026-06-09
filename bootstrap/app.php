@@ -4,6 +4,9 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use DomainException;
 
 return Application::configure(
     basePath: dirname(__DIR__)
@@ -63,6 +66,36 @@ return Application::configure(
                         'success' => false,
                         'message' => $e->getMessage(),
                     ], 409);
+                }
+            }
+        );
+
+        // Recurso não encontrado
+        $exceptions->render(
+            function (
+                ModelNotFoundException $e,
+                $request
+            ) {
+                if ($request->is('api/*')) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Recurso não encontrado.',
+                    ], 404);
+                }
+            }
+        );
+
+        // Rota não encontrada
+        $exceptions->render(
+            function (
+                NotFoundHttpException $e,
+                $request
+            ) {
+                if ($request->is('api/*')) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Recurso não encontrado.',
+                    ], 404);
                 }
             }
         );

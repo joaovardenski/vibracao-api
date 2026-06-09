@@ -5,11 +5,14 @@ namespace App\Services;
 use App\Models\Payment;
 use App\Models\Order;
 use Illuminate\Support\Facades\DB;
+use App\Services\MercadoPagoService;
+use App\Services\TicketNumberService;
 
 class HandlePaymentWebhookService
 {
     public function __construct(
-        private MercadoPagoService $mercadoPago
+        private MercadoPagoService $mercadoPago,
+        private TicketNumberService $ticketNumberService
     ) {}
 
     public function execute(array $payload): void
@@ -92,7 +95,7 @@ class HandlePaymentWebhookService
                 'approved' => $order->update([
                     'status'          => 'approved',
                     'approved_at'     => $now,
-                    'ticket_number'   => $this->generateTicketNumber($order->id),
+                    'ticket_number'   => $this->ticketNumberService->generate(),
                     'expires_at'     => null,
                 ]),
                 'rejected',
@@ -102,12 +105,5 @@ class HandlePaymentWebhookService
                 default => null,
             };
         });
-    }
-
-    private function generateTicketNumber(string $orderId): string
-    {
-        // Busca o número sequencial da order para garantir unicidade
-        $seq = Order::where('status', 'approved')->count();
-        return 'VJ' . str_pad($seq, 5, '0', STR_PAD_LEFT);
     }
 }
