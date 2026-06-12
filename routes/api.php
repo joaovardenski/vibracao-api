@@ -35,7 +35,7 @@ Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
 
     Route::get('/registrations', [RegistrationManagementController::class, 'index']);
     Route::post('/registrations', [RegistrationManagementController::class, 'store']);
-    Route::get('/registrations/export/pdf', [RegistrationManagementController::class, 'exportPdf']);
+    Route::get('/registrations/exportPdf', [RegistrationManagementController::class, 'exportPdf']);
     Route::get('/registrations/{order}', [RegistrationManagementController::class, 'show']);
 
     Route::get('/admins', [AdminManagementController::class, 'index']);

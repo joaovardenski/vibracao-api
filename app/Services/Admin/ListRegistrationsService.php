@@ -10,7 +10,6 @@ class ListRegistrationsService
     public function execute(
         int $perPage = 15,
         ?string $search = null,
-        ?string $status = null,
     ): LengthAwarePaginator {
 
         return Order::query()
@@ -19,11 +18,7 @@ class ListRegistrationsService
                 'ticketLot'
             ])
 
-            ->when(
-                $status,
-                fn ($query) =>
-                    $query->where('status', $status)
-            )
+            ->where('status', 'approved')
 
             ->when(
                 $search,

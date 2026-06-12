@@ -26,7 +26,6 @@ class RegistrationManagementController extends Controller
             'data' => $this->listRegistrations->execute(
                 perPage: $request->integer('per_page', 15),
                 search: $request->input('search'),
-                status: $request->input('status'),
             ),
         ]);
     }
