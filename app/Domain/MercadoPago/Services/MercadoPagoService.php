@@ -1,18 +1,21 @@
 <?php
 
-namespace App\Services;
+namespace App\Domain\MercadoPago\Services;
 
-use Exception;
-use DomainException;
-use MercadoPago\MercadoPagoConfig;
-use MercadoPago\Client\Preference\PreferenceClient;
-use MercadoPago\Client\Payment\PaymentClient;
 use App\Models\Participant;
+use DomainException;
+use Exception;
+use MercadoPago\Client\Payment\PaymentClient;
+use MercadoPago\Client\Preference\PreferenceClient;
 use MercadoPago\Exceptions\MPApiException;
+use MercadoPago\MercadoPagoConfig;
 use MercadoPago\Resources\Preference;
 
 class MercadoPagoService
 {
+    private const EXPIRATION_MINUTES = 15;
+    private const PAYMENT_METHOD_PIX = 'pix';
+
     public function __construct()
     {
         MercadoPagoConfig::setAccessToken(
@@ -28,28 +31,25 @@ class MercadoPagoService
     ): Preference {
         try {
             $client = new PreferenceClient();
+
             return $client->create([
                 'external_reference' => $externalReference,
                 'items' => [[
-                    'title'      => $title,
+                    'title' => $title,
                     'description' => 'Ingresso para o evento Vibração Jovem 2026',
-                    'quantity'   => 1,
-                    'unit_price' => 0.01,
+                    'quantity' => 1,
+                    'unit_price' => 0.01, //Alterar para $price
                 ]],
-
                 'payer' => [
                     'name' => $participant->full_name,
                     'email' => $participant->email,
-
                     'identification' => [
                         'type' => 'CPF',
                         'number' => $participant->cpf,
                     ],
                 ],
-
                 'payment_methods' => [
-                    'default_payment_method_id' => 'pix',
-
+                    'default_payment_method_id' => self::PAYMENT_METHOD_PIX,
                     'excluded_payment_types' => [
                         ['id' => 'credit_card'],
                         ['id' => 'debit_card'],
@@ -57,11 +57,7 @@ class MercadoPagoService
                         ['id' => 'ticket'],
                     ],
                 ],
-
-                'date_of_expiration' => now()
-                    ->addMinutes(15)
-                    ->toIso8601String(),
-
+                'date_of_expiration' => now()->addMinutes(self::EXPIRATION_MINUTES)->toIso8601String(),
                 'back_urls' => [
                     'success' => config('app.front_url') . '/payment',
                     'failure' => config('app.front_url') . '/payment',
@@ -72,7 +68,7 @@ class MercadoPagoService
         } catch (MPApiException $e) {
             $response = $e->getApiResponse();
             throw new Exception(json_encode([
-                'status'  => $response?->getStatusCode(),
+                'status' => $response?->getStatusCode(),
                 'content' => $response?->getContent(),
             ], JSON_PRETTY_PRINT));
         } catch (Exception $e) {
@@ -84,17 +80,15 @@ class MercadoPagoService
     {
         try {
             $client = new PaymentClient();
+
             return $client->get($paymentId);
         } catch (MPApiException $e) {
             $response = $e->getApiResponse();
             throw new DomainException(
-                $response?->getContent()['message']
-                ?? 'Erro ao buscar pagamento.'
+                $response?->getContent()['message'] ?? 'Erro ao buscar pagamento.'
             );
         } catch (Exception $e) {
-            throw new DomainException(
-                'Erro Mercado Pago.'
-            );
+            throw new DomainException('Erro Mercado Pago.');
         }
     }
 }

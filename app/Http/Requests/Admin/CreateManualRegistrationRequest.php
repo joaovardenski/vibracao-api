@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests\Admin;
 
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Contracts\Validation\Validator;
-use Illuminate\Http\Exceptions\HttpResponseException;
 use App\Rules\CpfRule;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class CreateManualRegistrationRequest extends FormRequest
 {
@@ -18,26 +18,23 @@ class CreateManualRegistrationRequest extends FormRequest
     {
         $this->merge([
 
-            'cpf' =>
-                preg_replace(
-                    '/\D/',
-                    '',
-                    $this->cpf ?? ''
-                ),
+            'cpf' => preg_replace(
+                '/\D/',
+                '',
+                $this->cpf ?? ''
+            ),
 
-            'phone' =>
-                preg_replace(
-                    '/\D/',
-                    '',
-                    $this->phone ?? ''
-                ),
+            'phone' => preg_replace(
+                '/\D/',
+                '',
+                $this->phone ?? ''
+            ),
 
-            'email' =>
-                strtolower(
-                    trim(
-                        $this->email ?? ''
-                    )
-                ),
+            'email' => strtolower(
+                trim(
+                    $this->email ?? ''
+                )
+            ),
 
         ]);
     }
@@ -56,7 +53,7 @@ class CreateManualRegistrationRequest extends FormRequest
             'cpf' => [
                 'required',
                 'string',
-                new CpfRule(),
+                new CpfRule,
             ],
 
             'email' => [
@@ -98,52 +95,33 @@ class CreateManualRegistrationRequest extends FormRequest
     {
         return [
 
-            'full_name.required' =>
-                'Informe o nome completo.',
+            'full_name.required' => 'Informe o nome completo.',
 
-            'full_name.min' =>
-                'O nome deve ter ao menos 5 caracteres.',
+            'full_name.min' => 'O nome deve ter ao menos 5 caracteres.',
 
-            'full_name.max' =>
-                'O nome deve ter no máximo 150 caracteres.',
+            'full_name.max' => 'O nome deve ter no máximo 150 caracteres.',
 
+            'cpf.required' => 'Informe o CPF.',
 
-            'cpf.required' =>
-                'Informe o CPF.',
+            'cpf.cpf' => 'CPF inválido.',
 
-            'cpf.cpf' =>
-                'CPF inválido.',
+            'email.required' => 'Informe o email.',
 
+            'email.email' => 'Email inválido.',
 
-            'email.required' =>
-                'Informe o email.',
+            'email.max' => 'Email muito grande.',
 
-            'email.email' =>
-                'Email inválido.',
+            'phone.required' => 'Informe o telefone.',
 
-            'email.max' =>
-                'Email muito grande.',
+            'phone.regex' => 'Telefone inválido.',
 
+            'city.required' => 'Informe a cidade.',
 
-            'phone.required' =>
-                'Informe o telefone.',
+            'city.max' => 'Cidade muito grande.',
 
-            'phone.regex' =>
-                'Telefone inválido.',
+            'parish.required' => 'Informe a paróquia.',
 
-
-            'city.required' =>
-                'Informe a cidade.',
-
-            'city.max' =>
-                'Cidade muito grande.',
-
-
-            'parish.required' =>
-                'Informe a paróquia.',
-
-            'parish.max' =>
-                'Paróquia muito grande.',
+            'parish.max' => 'Paróquia muito grande.',
         ];
     }
 
@@ -152,16 +130,13 @@ class CreateManualRegistrationRequest extends FormRequest
     ): void {
 
         throw new HttpResponseException(
-
             response()->json([
 
                 'success' => false,
 
-                'message' =>
-                    'Erro de validação.',
+                'message' => 'Erro de validação.',
 
-                'errors' =>
-                    $validator->errors(),
+                'errors' => $validator->errors(),
 
             ], 422)
 

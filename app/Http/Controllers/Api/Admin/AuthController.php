@@ -1,37 +1,38 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Admin;
 
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\Admin;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    public function login(LoginRequest $request)
+    public function login(LoginRequest $request): JsonResponse
     {
-        if (!Auth::attempt($request->validated())) {
+        if (! Auth::attempt($request->validated())) {
             return response()->json([
                 'success' => false,
                 'message' => 'Credenciais inválidas.',
             ], 401);
         }
 
+        /** @var Admin $admin */
         $admin = Auth::user();
-
-        /** @var \App\Models\Admin $admin*/
         $admin->tokens()->delete();
 
         return response()->json([
             'success' => true,
             'message' => 'Login realizado com sucesso.',
-            'token'   => $admin->createToken('api-token')->plainTextToken,
-            'admin'   => $admin,
+            'token' => $admin->createToken('api-token')->plainTextToken,
+            'admin' => $admin,
         ]);
     }
 
-    public function me(Request $request)
+    public function me(Request $request): JsonResponse
     {
         return response()->json([
             'success' => true,
@@ -39,7 +40,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()?->delete();
 

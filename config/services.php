@@ -40,7 +40,7 @@ return [
         'public_key' => env('MERCADO_PAGO_PUBLIC_KEY'),
         'access_token_prod' => env('MERCADO_PAGO_ACCESS_TOKEN_PROD'),
         'public_key_prod' => env('MERCADO_PAGO_PUBLIC_KEY_PROD'),
-        'webhook_secret'    => env('MERCADO_PAGO_SECRET_KEY_PROD'),
+        'webhook_secret' => env('MERCADO_PAGO_SECRET_KEY_PROD'),
     ],
 
 ];

@@ -2,52 +2,40 @@
 
 namespace App\Http\Controllers\Api\Admin;
 
+use App\Domain\Registration\Services\CreateManualRegistrationService;
+use App\Domain\Registration\Services\ExportRegistrationsPdfService;
+use App\Domain\Registration\Services\ListRegistrationsService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CreateManualRegistrationRequest;
 use App\Models\Order;
-use App\Services\Admin\CreateManualRegistrationService;
-use App\Services\Admin\ListRegistrationsService;
-use App\Services\Admin\ExportRegistrationsPdfService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class RegistrationManagementController extends Controller
 {
     public function __construct(
-        private ListRegistrationsService $listRegistrations,
-        private CreateManualRegistrationService $createManualRegistration,
-        private ExportRegistrationsPdfService $exportRegistrationsPdf,
+        private readonly ListRegistrationsService $listRegistrations,
+        private readonly CreateManualRegistrationService $createManualRegistration,
+        private readonly ExportRegistrationsPdfService $exportRegistrationsPdf,
     ) {}
 
     public function index(Request $request): JsonResponse
     {
+        $registrations = $this->listRegistrations->execute(
+            perPage: $request->integer('per_page', 15),
+            search: $request->input('search')
+        );
+
         return response()->json([
             'success' => true,
-            'data' => $this->listRegistrations->execute(
-                perPage: $request->integer('per_page', 15),
-                search: $request->input('search'),
-            ),
+            'data' => $registrations,
         ]);
     }
 
-    public function show(Order $order): JsonResponse
+    public function store(CreateManualRegistrationRequest $request): JsonResponse
     {
-        return response()->json([
-            'success' => true,
-            'data' => $order->load([
-                'participant',
-                'ticketLot',
-                'payment',
-            ]),
-        ]);
-    }
-
-    public function store(
-        CreateManualRegistrationRequest $request
-    ): JsonResponse {
-        $registration =
-            $this->createManualRegistration
-                ->execute($request->validated());
+        $registration = $this->createManualRegistration->execute($request->validated());
 
         return response()->json([
             'success' => true,
@@ -56,7 +44,17 @@ class RegistrationManagementController extends Controller
         ], 201);
     }
 
-    public function exportPdf()
+    public function show(Order $order): JsonResponse
+    {
+        $order->loadMissing(['participant', 'ticketLot', 'payment']);
+
+        return response()->json([
+            'success' => true,
+            'data' => $order,
+        ]);
+    }
+
+    public function exportPdf(): Response
     {
         return $this->exportRegistrationsPdf->execute();
     }

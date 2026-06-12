@@ -1,21 +1,24 @@
 <?php
-namespace App\Http\Controllers\Api;
 
+namespace App\Http\Controllers\Api\MercadoPago;
+
+use App\Domain\MercadoPago\Services\HandlePaymentWebhookService;
 use App\Http\Controllers\Controller;
-use App\Services\HandlePaymentWebhookService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class MercadoPagoWebhookController extends Controller
 {
     public function __construct(
-        private HandlePaymentWebhookService $webhookService
+        private readonly HandlePaymentWebhookService $webhookService
     ) {}
 
     public function handle(Request $request): JsonResponse
     {
         $this->webhookService->execute($request->all());
 
-        return response()->json(['status' => 'ok']);
+        return response()->json([
+            'status' => 'ok'
+        ]);
     }
 }

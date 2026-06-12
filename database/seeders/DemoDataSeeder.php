@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Order;
-use App\Models\Payment;
 use App\Models\Participant;
+use App\Models\Payment;
 use Illuminate\Database\Seeder;
 
 class DemoDataSeeder extends Seeder

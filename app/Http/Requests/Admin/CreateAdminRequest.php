@@ -52,31 +52,21 @@ class CreateAdminRequest extends FormRequest
     {
         return [
 
-            'name.required' =>
-                'Informe o nome.',
+            'name.required' => 'Informe o nome.',
 
-            'name.min' =>
-                'O nome deve possuir ao menos 3 caracteres.',
+            'name.min' => 'O nome deve possuir ao menos 3 caracteres.',
 
-            'name.max' =>
-                'O nome deve possuir no máximo 150 caracteres.',
+            'name.max' => 'O nome deve possuir no máximo 150 caracteres.',
 
+            'email.required' => 'Informe o email.',
 
-            'email.required' =>
-                'Informe o email.',
+            'email.email' => 'Email inválido.',
 
-            'email.email' =>
-                'Email inválido.',
+            'email.unique' => 'Já existe um administrador com este email.',
 
-            'email.unique' =>
-                'Já existe um administrador com este email.',
+            'password.required' => 'Informe a senha.',
 
-
-            'password.required' =>
-                'Informe a senha.',
-
-            'password.min' =>
-                'A senha deve possuir ao menos 8 caracteres.',
+            'password.min' => 'A senha deve possuir ao menos 8 caracteres.',
         ];
     }
 
@@ -85,16 +75,13 @@ class CreateAdminRequest extends FormRequest
     ): void {
 
         throw new HttpResponseException(
-
             response()->json([
 
                 'success' => false,
 
-                'message' =>
-                    'Erro de validação.',
+                'message' => 'Erro de validação.',
 
-                'errors' =>
-                    $validator->errors(),
+                'errors' => $validator->errors(),
 
             ], 422)
 

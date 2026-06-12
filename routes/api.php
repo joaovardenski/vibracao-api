@@ -1,46 +1,73 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\RegistrationController;
-use App\Http\Controllers\Api\MercadoPagoWebhookController;
+use App\Http\Controllers\Api\Admin\AdminManagementController;
 use App\Http\Controllers\Api\Admin\DashboardController;
 use App\Http\Controllers\Api\Admin\RegistrationManagementController;
-use App\Http\Controllers\Api\Admin\AdminManagementController;
+use App\Http\Controllers\Api\Admin\AuthController;
+use App\Http\Controllers\Api\MercadoPago\MercadoPagoWebhookController;
+use App\Http\Controllers\Api\Registration\RegistrationController;
+use Illuminate\Support\Facades\Route;
 
-// Authentication routes
-Route::post('/login', [AuthController::class, 'login'])->name('api.login')
+/*
+|--------------------------------------------------------------------------
+| Public & Guest Routes
+|--------------------------------------------------------------------------
+*/
+
+// Auth (Guest / Rate Limited)
+Route::post('/login', [AuthController::class, 'login'])
+    ->name('api.login')
     ->middleware('throttle:10,1');
 
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/me',      [AuthController::class, 'me'])->name('api.me');
-    Route::post('/logout', [AuthController::class, 'logout'])->name('api.logout');
+// Webhooks
+Route::post('/webhooks/mercado-pago', [MercadoPagoWebhookController::class, 'handle'])
+    ->name('api.webhooks.mercado-pago')
+    ->middleware(['throttle:100,1', 'mp.signature']);
+
+// Public Registrations & Orders
+Route::prefix('registrations')->name('api.registrations.')->group(function () {
+    Route::post('/', [RegistrationController::class, 'store'])
+        ->name('store')
+        ->middleware('throttle:5,1');
 });
 
-// Registration routes
-Route::post('/registrations', [RegistrationController::class, 'store'])->name('api.registrations.store')
-    ->middleware('throttle:5,1');
+Route::prefix('orders')->name('api.orders.')->group(function () {
+    Route::get('/{order}/status', [RegistrationController::class, 'status'])
+        ->name('status');
+});
 
-// Webhook routes
-Route::post('/webhooks/mercado-pago', [MercadoPagoWebhookController::class, 'handle'])->name('api.webhooks.mercado-pago')
-    ->middleware('throttle:100,1')
-    ->middleware('mp.signature');
+/*
+|--------------------------------------------------------------------------
+| Authenticated Routes (Sanctum)
+|--------------------------------------------------------------------------
+*/
+Route::middleware('auth:sanctum')->group(function () {
 
-// Order Status Update route
-Route::get('/orders/{order}/status', [RegistrationController::class, 'status'])->name('api.orders.status');
+    // User Profile & Session
+    Route::get('/me', [AuthController::class, 'me'])->name('api.me');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('api.logout');
 
-// Admin routes
-Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index']);
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Routes
+    |--------------------------------------------------------------------------
+    | Prefixed by 'admin/' and sharing the same auth context.
+    */
+    Route::prefix('admin')->name('api.admin.')->group(function () {
+        
+        // Dashboard
+        Route::get('/dashboard', [DashboardController::class, 'index'])
+            ->name('dashboard');
 
-    Route::get('/registrations', [RegistrationManagementController::class, 'index']);
-    Route::post('/registrations', [RegistrationManagementController::class, 'store']);
-    Route::get('/registrations/exportPdf', [RegistrationManagementController::class, 'exportPdf']);
-    Route::get('/registrations/{order}', [RegistrationManagementController::class, 'show']);
+        // Registration Management
+        Route::prefix('registrations')->name('registrations.')->group(function () {
+            Route::get('/', [RegistrationManagementController::class, 'index'])->name('index');
+            Route::post('/', [RegistrationManagementController::class, 'store'])->name('store');
+            Route::get('/export-pdf', [RegistrationManagementController::class, 'exportPdf'])->name('export-pdf');
+            Route::get('/{order}', [RegistrationManagementController::class, 'show'])->name('show');
+        });
 
-    Route::get('/admins', [AdminManagementController::class, 'index']);
-    Route::post('/admins', [AdminManagementController::class, 'store']);
-    Route::get('/admins/{admin}', [AdminManagementController::class, 'show']);
-    Route::put('/admins/{admin}', [AdminManagementController::class, 'update']);
-    Route::delete('/admins/{admin}', [AdminManagementController::class, 'destroy']);
+        // Admin User CRUD (index, store, show, update, destroy)
+        Route::apiResource('admins', AdminManagementController::class);
+    });
 });

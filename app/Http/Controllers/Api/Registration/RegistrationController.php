@@ -1,17 +1,22 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Registration;
 
+use App\Domain\Registration\Services\CreateRegistrationService;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Http\Requests\RegistrationRequest;
-use App\Services\CreateRegistrationService;
 use App\Models\Order;
+use Illuminate\Http\JsonResponse;
 
 class RegistrationController extends Controller
 {
-    public function store(RegistrationRequest $request, CreateRegistrationService $service) {
-        $result = $service->execute($request->validated());
+    public function __construct(
+        private readonly CreateRegistrationService $createRegistrationService
+    ) {}
+
+    public function store(RegistrationRequest $request): JsonResponse
+    {
+        $result = $this->createRegistrationService->execute($request->validated());
 
         return response()->json([
             'success' => true,
@@ -20,22 +25,16 @@ class RegistrationController extends Controller
         ], 201);
     }
 
-    public function status(Order $order)
+    public function status(Order $order): JsonResponse
     {
-        $order->load([
-            'participant',
-            'ticketLot',
-            'payment',
-        ]);
+        $order->loadMissing(['participant', 'ticketLot', 'payment']);
 
         return response()->json([
             'status' => $order->payment?->status ?? 'pending',
-
             'participant' => [
                 'name' => $order->participant->full_name,
                 'email' => $order->participant->email,
             ],
-
             'ticket' => [
                 'lot' => $order->ticketLot->name,
                 'amount' => $order->amount,

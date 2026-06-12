@@ -7,16 +7,13 @@ use App\Models\Participant;
 use App\Models\TicketLot;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<Order>
- */
 class OrderFactory extends Factory
 {
     protected $model = Order::class;
 
     public function definition(): array
     {
-        $status = 
+        $status =
         fake()->randomElement([
             'pending',
             'approved',
@@ -36,7 +33,7 @@ class OrderFactory extends Factory
 
             'ticket_lot_id' => TicketLot::factory(),
 
-            'ticket_number' => 'VJ2026-' . fake()->unique()->numerify('####'),
+            'ticket_number' => 'VJ2026-'.fake()->unique()->numerify('####'),
 
             'status' => $status,
 

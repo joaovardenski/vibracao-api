@@ -1,10 +1,11 @@
 <?php
 
+use App\Http\Middleware\ValidateMercadoPagoSignature;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(
@@ -22,14 +23,13 @@ return Application::configure(
         Middleware $middleware
     ): void {
         $middleware->redirectGuestsTo(
-            fn ($request) =>
-                $request->is('api/*')
+            fn ($request) => $request->is('api/*')
                     ? null
                     : route('login')
         );
 
         $middleware->alias([
-            'mp.signature' => \App\Http\Middleware\ValidateMercadoPagoSignature::class,
+            'mp.signature' => ValidateMercadoPagoSignature::class,
         ]);
     })
 

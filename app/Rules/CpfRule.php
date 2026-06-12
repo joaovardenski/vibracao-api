@@ -24,6 +24,7 @@ class CpfRule implements ValidationRule
             preg_match('/(\d)\1{10}/', $cpf)
         ) {
             $fail('CPF inválido.');
+
             return;
         }
 
@@ -45,8 +46,9 @@ class CpfRule implements ValidationRule
                 $result = 0;
             }
 
-            if ((int)$cpf[$digit] !== $result) {
+            if ((int) $cpf[$digit] !== $result) {
                 $fail('CPF inválido.');
+
                 return;
             }
         }
