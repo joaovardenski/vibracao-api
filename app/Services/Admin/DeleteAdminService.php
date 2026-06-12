@@ -18,10 +18,11 @@ class DeleteAdminService
         }
 
         DB::transaction(function () use ($admin) {
-            // Trava o registro antes de contar
-            Admin::lockForUpdate()->count();
+            // 1. Buscamos TODOS os admins aplicando o Lock nas linhas (o Postgres aceita aqui)
+            $allAdmins = Admin::lockForUpdate()->get();
 
-            if (Admin::count() <= 1) {
+            // 2. Contamos o resultado direto na Collection do Laravel (sem tocar no banco de novo)
+            if ($allAdmins->count() <= 1) {
                 throw new DomainException(
                     'O sistema deve possuir ao menos um administrador.'
                 );
