@@ -29,6 +29,10 @@ Route::prefix('registrations')->name('api.registrations.')->group(function () {
     Route::post('/', [RegistrationController::class, 'store'])
         ->name('store')
         ->middleware('throttle:5,1');
+
+    Route::get('/status/{cpf}', [RegistrationController::class, 'statusByCpf'])
+        ->name('status-by-cpf')
+        ->middleware('throttle:10,1');
 });
 
 Route::prefix('orders')->name('api.orders.')->group(function () {

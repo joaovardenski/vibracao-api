@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\RegistrationRequest;
 use App\Models\Order;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class RegistrationController extends Controller
 {
@@ -35,6 +36,46 @@ class RegistrationController extends Controller
                 'name' => $order->participant->full_name,
                 'email' => $order->participant->email,
             ],
+            'ticket' => [
+                'lot' => $order->ticketLot->name,
+                'amount' => $order->amount,
+                'ticket_number' => $order->ticket_number,
+            ],
+        ]);
+    }
+
+    public function statusByCpf(Request $request, string $cpf): JsonResponse
+    {
+        $request->validate([
+            'email' => 'required|email'
+        ]);
+
+        $cleanCpf = preg_replace('/\D/', '', $cpf);
+        $email = strtolower(trim($request->query('email')));
+
+        $order = Order::whereHas('participant', function ($query) use ($cleanCpf, $email) {
+            $query->where('cpf', $cleanCpf)
+                ->whereRaw('LOWER(email) = ?', [$email]);
+        })
+        ->whereHas('payment', function ($query) {
+            $query->where('status', 'approved');
+        })
+        ->latest()
+        ->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nenhuma inscrição confirmada foi encontrada com os dados fornecidos.'
+            ], 404);
+        }
+
+        $order->loadMissing(['participant', 'ticketLot', 'payment']);
+
+        return response()->json([
+            'full_name' => $order->participant->full_name,
+            'created_at' => $order->created_at->toIso8601String(),
+            'status' => $order->payment->status,
             'ticket' => [
                 'lot' => $order->ticketLot->name,
                 'amount' => $order->amount,

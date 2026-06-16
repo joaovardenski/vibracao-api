@@ -38,7 +38,7 @@ class HandlePaymentWebhookService
     private function findPayment(object $gatewayPayment): ?Payment
     {
         /** @var Payment|null $payment */
-        $payment = Payment::query()
+        $payment = Payment::query() //Verificar se não está caindo só em fallback (payment id != preference id)
             ->where('gateway_payment_id', $gatewayPayment->id)
             ->first();
 
